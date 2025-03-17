@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abrir PDF ou Enviar SMS</title>
+    <title>Abrir PDF ou Exibir Conteúdo Offline</title>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('service-worker.js');
         }
 
-        // Caminho para o arquivo .txt (modifique com o link correto onde o arquivo está hospedado)
+        // URL do arquivo .txt que você quer carregar quando estiver offline
         const arquivoTxtUrl = "https://exemplo.com/informacoes.txt";
 
         async function carregarConteudoTexto() {
@@ -38,17 +38,12 @@
 
         window.onload = function() {
             if (navigator.onLine) {
-                carregarConteudoTexto(); // Carrega o conteúdo do arquivo .txt
+                // Carregar e exibir o PDF quando estiver online
+                window.location.href = "https://drive.google.com/uc?id=1sIbxOsa8EHKd0TigWAth4bwPxCkPO08N";
             } else {
-                // Mostra as opções offline
+                // Carregar e exibir o conteúdo do .txt quando estiver offline
                 document.getElementById("offline-options").style.display = "block";
-                const textoSalvo = localStorage.getItem("conteudoDocumento");
-
-                if (textoSalvo) {
-                    document.getElementById("conteudoOffline").innerText = textoSalvo;
-                } else {
-                    document.getElementById("conteudoOffline").innerText = "Conteúdo não disponível.";
-                }
+                carregarConteudoTexto();
             }
         };
 
@@ -58,29 +53,13 @@
                 alert("Conteúdo copiado!");
             });
         }
-
-        function enviarSMS() {
-            let numero = document.getElementById("telefone").value.trim();
-            if (numero === "") {
-                alert("Por favor, digite um número de telefone válido.");
-                return;
-            }
-            const textoSalvo = localStorage.getItem("conteudoDocumento") || "Conteúdo não disponível.";
-            let smsLink = `sms:+55${numero}?body=${encodeURIComponent(textoSalvo)}`;
-            window.location.href = smsLink;
-        }
     </script>
 </head>
 <body>
     <div id="offline-options" style="display: none; text-align: center; padding: 20px;">
-        <h2 id="offline-message">Sem internet? Você ainda pode acessar o documento!</h2>
+        <h2 id="offline-message">Sem internet? Você ainda pode acessar o conteúdo!</h2>
         <p><strong>Conteúdo salvo:</strong> <span id="conteudoOffline"></span></p>
         <button onclick="copiarParaClipboard()" style="font-size: 16px; padding: 10px;">Copiar Conteúdo</button>
-        <br><br>
-        <h3>Ou insira seu telefone para receber o conteúdo via SMS</h3>
-        <input type="tel" id="telefone" placeholder="Digite seu número com DDD" style="font-size: 16px; padding: 8px;">
-        <button onclick="enviarSMS()" style="font-size: 18px; padding: 10px; margin-left: 10px;">Receber Conteúdo</button>
     </div>
 </body>
 </html>
-
