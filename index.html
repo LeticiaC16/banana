@@ -6,34 +6,47 @@
     <title>Abrir PDF ou Enviar SMS</title>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js').then(() => {
-                console.log("Service Worker registrado!");
-            }).catch((error) => {
-                console.log("Erro ao registrar o Service Worker:", error);
-            });
+            navigator.serviceWorker.register('service-worker.js');
         }
 
         const linkDocumento = "https://drive.google.com/uc?id=1sIbxOsa8EHKd0TigWAth4bwPxCkPO08N";
 
+        async function baixarConteudo() {
+            try {
+                const response = await fetch(linkDocumento);
+                const text = await response.text();
+                localStorage.setItem("conteudoDocumento", text);
+                localStorage.setItem("documentoOffline", linkDocumento);
+            } catch (error) {
+                console.log("Erro ao baixar conteúdo:", error);
+            }
+        }
+
         window.onload = function() {
             if (navigator.onLine) {
-                localStorage.setItem("documentoOffline", linkDocumento);
+                baixarConteudo();
                 window.location.href = linkDocumento;
             } else {
                 document.getElementById("offline-options").style.display = "block";
                 const linkSalvo = localStorage.getItem("documentoOffline");
+                const textoSalvo = localStorage.getItem("conteudoDocumento");
+                
                 if (linkSalvo) {
                     document.getElementById("linkOffline").innerText = linkSalvo;
                 } else {
                     document.getElementById("offline-message").innerText = "Nenhum acesso prévio ao documento.";
                 }
+
+                if (textoSalvo) {
+                    document.getElementById("conteudoOffline").innerText = textoSalvo;
+                }
             }
         };
 
         function copiarParaClipboard() {
-            const link = document.getElementById("linkOffline").innerText;
-            navigator.clipboard.writeText(link).then(() => {
-                alert("Link copiado!");
+            const texto = document.getElementById("conteudoOffline").innerText;
+            navigator.clipboard.writeText(texto).then(() => {
+                alert("Conteúdo copiado!");
             });
         }
 
@@ -43,8 +56,8 @@
                 alert("Por favor, digite um número de telefone válido.");
                 return;
             }
-            const linkSalvo = localStorage.getItem("documentoOffline") || linkDocumento;
-            let smsLink = `sms:+55${numero}?body=Acesse o documento aqui: ${encodeURIComponent(linkSalvo)}`;
+            const textoSalvo = localStorage.getItem("conteudoDocumento") || "Conteúdo não disponível.";
+            let smsLink = `sms:+55${numero}?body=${encodeURIComponent(textoSalvo)}`;
             window.location.href = smsLink;
         }
     </script>
@@ -53,11 +66,13 @@
     <div id="offline-options" style="display: none; text-align: center; padding: 20px;">
         <h2 id="offline-message">Sem internet? Você ainda pode acessar o documento!</h2>
         <p><strong>Link salvo:</strong> <span id="linkOffline"></span></p>
-        <button onclick="copiarParaClipboard()" style="font-size: 16px; padding: 10px;">Copiar Link</button>
+        <p><strong>Conteúdo salvo:</strong> <span id="conteudoOffline"></span></p>
+        <button onclick="copiarParaClipboard()" style="font-size: 16px; padding: 10px;">Copiar Conteúdo</button>
         <br><br>
-        <h3>Ou insira seu telefone para receber o PDF via SMS</h3>
+        <h3>Ou insira seu telefone para receber o conteúdo via SMS</h3>
         <input type="tel" id="telefone" placeholder="Digite seu número com DDD" style="font-size: 16px; padding: 8px;">
-        <button onclick="enviarSMS()" style="font-size: 18px; padding: 10px; margin-left: 10px;">Receber PDF</button>
+        <button onclick="enviarSMS()" style="font-size: 18px; padding: 10px; margin-left: 10px;">Receber Conteúdo</button>
     </div>
 </body>
 </html>
+
