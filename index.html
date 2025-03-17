@@ -6,7 +6,11 @@
     <title>Abrir PDF ou Enviar SMS</title>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js');
+            navigator.serviceWorker.register('service-worker.js').then(() => {
+                console.log("Service Worker registrado!");
+            }).catch((error) => {
+                console.log("Erro ao registrar o Service Worker:", error);
+            });
         }
 
         const linkDocumento = "https://drive.google.com/uc?id=1sIbxOsa8EHKd0TigWAth4bwPxCkPO08N";
