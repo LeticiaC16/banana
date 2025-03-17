@@ -1,5 +1,8 @@
-const CACHE_NAME = "offline-cache-v1";
-const urlsToCache = ["/", "index.html"];
+const CACHE_NAME = "offline-cache-v2";
+const urlsToCache = [
+    "/",
+    "index.html"
+];
 
 self.addEventListener("install", (event) => {
     event.waitUntil(
@@ -11,6 +14,10 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("fetch", (event) => {
     event.respondWith(
-        fetch(event.request).catch(() => caches.match("index.html"))
+        fetch(event.request).catch(() => {
+            return caches.match(event.request).then((response) => {
+                return response || caches.match("index.html");
+            });
+        })
     );
 });
