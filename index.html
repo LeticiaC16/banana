@@ -9,8 +9,8 @@
             navigator.serviceWorker.register('service-worker.js');
         }
 
-        // URL do arquivo .txt que você quer carregar quando estiver offline
-        const arquivoTxtUrl = "https://exemplo.com/informacoes.txt"; // Substitua pelo caminho correto
+        // URL do arquivo .txt no GitHub (raw)
+        const arquivoTxtUrl = "https://raw.githubusercontent.com/LeticiaC16/banana/refs/heads/main/informacoes.txt";
 
         async function carregarConteudoTexto() {
             try {
