@@ -4,50 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Abrir PDF ou Enviar SMS</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('service-worker.js');
         }
 
-        const linkDocumento = "https://drive.google.com/uc?id=1sIbxOsa8EHKd0TigWAth4bwPxCkPO08N";
+        // Caminho para o arquivo .txt (modifique com o link correto onde o arquivo está hospedado)
+        const arquivoTxtUrl = "https://exemplo.com/informacoes.txt";
 
-        async function extrairTextoDoPDF(url) {
+        async function carregarConteudoTexto() {
             try {
-                const loadingTask = pdfjsLib.getDocument(url);
-                const pdf = await loadingTask.promise;
-                let textoExtraido = '';
-
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    textoExtraido += textContent.items.map(item => item.str).join(' ') + '\n';
+                const response = await fetch(arquivoTxtUrl);
+                if (!response.ok) {
+                    throw new Error("Erro ao carregar o arquivo.");
                 }
+                const conteudoTexto = await response.text();
+                localStorage.setItem("conteudoDocumento", conteudoTexto);
 
-                localStorage.setItem("conteudoDocumento", textoExtraido);
-                localStorage.setItem("documentoOffline", linkDocumento);
+                // Exibe o conteúdo na tela
+                document.getElementById("conteudoOffline").innerText = conteudoTexto;
             } catch (error) {
-                console.log("Erro ao extrair texto do PDF:", error);
+                console.log("Erro ao carregar o arquivo:", error);
+                document.getElementById("offline-options").style.display = "block";
+                const textoSalvo = localStorage.getItem("conteudoDocumento");
+
+                if (textoSalvo) {
+                    document.getElementById("conteudoOffline").innerText = textoSalvo;
+                } else {
+                    document.getElementById("conteudoOffline").innerText = "Conteúdo não disponível.";
+                }
             }
         }
 
         window.onload = function() {
             if (navigator.onLine) {
-                extrairTextoDoPDF(linkDocumento);
-                window.location.href = linkDocumento;
+                carregarConteudoTexto(); // Carrega o conteúdo do arquivo .txt
             } else {
+                // Mostra as opções offline
                 document.getElementById("offline-options").style.display = "block";
-                const linkSalvo = localStorage.getItem("documentoOffline");
                 const textoSalvo = localStorage.getItem("conteudoDocumento");
-                
-                if (linkSalvo) {
-                    document.getElementById("linkOffline").innerText = linkSalvo;
-                } else {
-                    document.getElementById("offline-message").innerText = "Nenhum acesso prévio ao documento.";
-                }
 
                 if (textoSalvo) {
                     document.getElementById("conteudoOffline").innerText = textoSalvo;
+                } else {
+                    document.getElementById("conteudoOffline").innerText = "Conteúdo não disponível.";
                 }
             }
         };
@@ -74,7 +74,6 @@
 <body>
     <div id="offline-options" style="display: none; text-align: center; padding: 20px;">
         <h2 id="offline-message">Sem internet? Você ainda pode acessar o documento!</h2>
-        <p><strong>Link salvo:</strong> <span id="linkOffline"></span></p>
         <p><strong>Conteúdo salvo:</strong> <span id="conteudoOffline"></span></p>
         <button onclick="copiarParaClipboard()" style="font-size: 16px; padding: 10px;">Copiar Conteúdo</button>
         <br><br>
