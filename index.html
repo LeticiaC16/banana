@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Abrir PDF ou Enviar SMS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('service-worker.js');
@@ -11,20 +12,28 @@
 
         const linkDocumento = "https://drive.google.com/uc?id=1sIbxOsa8EHKd0TigWAth4bwPxCkPO08N";
 
-        async function baixarConteudo() {
+        async function extrairTextoDoPDF(url) {
             try {
-                const response = await fetch(linkDocumento);
-                const text = await response.text();
-                localStorage.setItem("conteudoDocumento", text);
+                const loadingTask = pdfjsLib.getDocument(url);
+                const pdf = await loadingTask.promise;
+                let textoExtraido = '';
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    textoExtraido += textContent.items.map(item => item.str).join(' ') + '\n';
+                }
+
+                localStorage.setItem("conteudoDocumento", textoExtraido);
                 localStorage.setItem("documentoOffline", linkDocumento);
             } catch (error) {
-                console.log("Erro ao baixar conteúdo:", error);
+                console.log("Erro ao extrair texto do PDF:", error);
             }
         }
 
         window.onload = function() {
             if (navigator.onLine) {
-                baixarConteudo();
+                extrairTextoDoPDF(linkDocumento);
                 window.location.href = linkDocumento;
             } else {
                 document.getElementById("offline-options").style.display = "block";
