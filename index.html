@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso ao Documento</title>
+    <script>
+        const linkDocumento = "https://drive.google.com/uc?id=1sIbxOsa8EHKd0TigWAth4bwPxCkPO08N";
+
+        function verificarConexao() {
+            if (navigator.onLine) {
+                // Se houver internet, exibe o documento e salva o link localmente
+                localStorage.setItem("documentoOffline", linkDocumento);
+                document.getElementById('documento').innerHTML = `<iframe src="${linkDocumento}" width="100%" height="500px"></iframe>`;
+            } else {
+                // Se estiver offline, exibe as opções de cópia e SMS
+                const linkSalvo = localStorage.getItem("documentoOffline");
+                if (linkSalvo) {
+                    document.getElementById('offline').style.display = 'block';
+                    document.getElementById('linkOffline').innerText = linkSalvo;
+                } else {
+                    alert("Sem internet e sem acesso prévio ao documento!");
+                }
+            }
+        }
+
+        function copiarParaAreaDeTransferencia() {
+            const texto = document.getElementById('linkOffline').innerText;
+            navigator.clipboard.writeText(texto).then(function() {
+                alert("Link copiado!");
+            });
+        }
+
+        function enviarPorSMS() {
+            const numero = document.getElementById('numeroTelefone').value;
+            const linkSalvo = localStorage.getItem("documentoOffline") || linkDocumento;
+
+            if (numero) {
+                const smsLink = `sms:${numero}?body=Link do documento: ${encodeURIComponent(linkSalvo)}`;
+                window.location.href = smsLink;
+            } else {
+                alert("Digite um número de telefone!");
+            }
+        }
+    </script>
+</head>
+<body onload="verificarConexao()">
+    <h1>Documento</h1>
+    <div id="documento"></div>
+    
+    <div id="offline" style="display: none;">
+        <p><strong>Link salvo:</strong> <span id="linkOffline"></span></p>
+        <button onclick="copiarParaAreaDeTransferencia()">Copiar Link</button>
+        <br><br>
+        <input type="tel" id="numeroTelefone" placeholder="Digite o número p/ SMS">
+        <button onclick="enviarPorSMS()">Enviar por SMS</button>
+    </div>
+</body>
+</html>
