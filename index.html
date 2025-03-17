@@ -5,15 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Abrir PDF ou Enviar SMS</title>
     <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js');
+        }
+
         const linkDocumento = "https://drive.google.com/uc?id=1sIbxOsa8EHKd0TigWAth4bwPxCkPO08N";
 
         window.onload = function() {
             if (navigator.onLine) {
-                // Salva o link localmente e redireciona para o documento
                 localStorage.setItem("documentoOffline", linkDocumento);
                 window.location.href = linkDocumento;
             } else {
-                // Se estiver offline, exibe as opções de SMS e cópia do link
                 document.getElementById("offline-options").style.display = "block";
                 const linkSalvo = localStorage.getItem("documentoOffline");
                 if (linkSalvo) {
